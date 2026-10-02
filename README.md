@@ -1,377 +1,251 @@
-# Laboratorio-de-electr-nic
-import os
+# Laboratorio-de-electronic
+# INFORME DEL SISTEMA DE GESTIÓN DE INVENTARIO DEL LABORATORIO DE ELECTRÓNICA
 
-# --- BASE DE DATOS EN TEXTO PLANO ---
-ARCHIVO_DB = "inventario.txt"
+## 1. Introducción
 
-# =====================================================================
-# --- SECCIÓN: CLASE PADRE (Componente Electrónico General) ---
-# =====================================================================
-class ComponenteElectronico:
-    def __init__(self, id_item, nombre, cantidad, ubicacion):
-        self.id = id_item
-        self.nombre = nombre
-        self.cantidad = int(cantidad)
-        self.ubicacion = ubicacion
+En este proyecto se desarrolló un programa en Python para administrar el inventario de un laboratorio de electrónica. El sistema permite registrar, consultar y eliminar diferentes componentes electrónicos, además de guardar la información en un archivo de texto para que los datos no se pierdan al cerrar el programa.
 
-    def obtener_detalles(self):
-        return f"ID: {self.id} | {self.nombre} | Cantidad: {self.cantidad} | Ubicación: {self.ubicacion}"
+Para realizar el programa se utilizó principalmente el concepto de **programación orientada a objetos (POO)**, utilizando clases, objetos, herencia y métodos. También se implementó un sistema de usuarios con diferentes roles, permitiendo que los estudiantes puedan consultar el inventario y que el encargado del laboratorio pueda administrar los componentes.
 
-    def to_string(self):
-        return f"General,{self.id},{self.nombre},{self.cantidad},{self.ubicacion}"
+## 2. Objetivo general
 
+Desarrollar un sistema en Python que permita gestionar de manera organizada el inventario de un laboratorio de electrónica mediante el uso de programación orientada a objetos y almacenamiento de información en un archivo de texto.
 
-# =====================================================================
-# --- SECCIÓN: CLASES HIJAS (COMPONENTES PASIVOS) ---
-# =====================================================================
-class Resistencia(ComponenteElectronico):
-    def __init__(self, id_item, nombre, cantidad, ubicacion, valor_ohmios, tolerancia):
-        super().__init__(id_item, nombre, cantidad, ubicacion)
-        self.valor_ohmios = valor_ohmios
-        self.tolerancia = tolerancia
+## 3. Objetivos específicos
 
-    def obtener_detalles(self):
-        base = super().obtener_detalles()
-        return f"{base} | [Resistencia] Valor: {self.valor_ohmios} | Tolerancia: {self.tolerancia}%"
+* Crear clases para representar los diferentes componentes electrónicos.
+* Utilizar herencia para organizar las diferentes clases de componentes.
+* Permitir registrar nuevos componentes en el inventario.
+* Permitir eliminar componentes utilizando su ID.
+* Mostrar la información completa del inventario.
+* Crear diferentes tipos de usuarios y asignarles funciones según su rol.
+* Guardar la información en un archivo de texto.
+* Cargar automáticamente la información guardada cuando se inicia el programa.
 
-    def to_string(self):
-        return f"Resistencia,{self.id},{self.nombre},{self.cantidad},{self.ubicacion},{self.valor_ohmios},{self.tolerancia}"
+## 4. Desarrollo del programa
 
+### 4.1 Importación y archivo de almacenamiento
 
-class Condensador(ComponenteElectronico):
-    def __init__(self, id_item, nombre, cantidad, ubicacion, capacitancia, voltaje_max):
-        super().__init__(id_item, nombre, cantidad, ubicacion)
-        self.capacitancia = capacitancia
-        self.voltaje_max = voltaje_max
+Al comienzo del programa se utiliza:
 
-    def obtener_detalles(self):
-        base = super().obtener_detalles()
-        return f"{base} | [Condensador] Capacitancia: {self.capacitancia} | Voltaje Máx: {self.voltaje_max}V"
+`import os`
 
-    def to_string(self):
-        return f"Condensador,{self.id},{self.nombre},{self.cantidad},{self.ubicacion},{self.capacitancia},{self.voltaje_max}"
+Esta librería permite trabajar con elementos del sistema operativo. En este caso se utiliza para comprobar si existe el archivo donde se almacena el inventario.
 
+También se define:
 
-class Bobina(ComponenteElectronico):
-    def __init__(self, id_item, nombre, cantidad, ubicacion, inductancia, corriente_max):
-        super().__init__(id_item, nombre, cantidad, ubicacion)
-        self.inductancia = inductancia
-        self.corriente_max = corriente_max
+`ARCHIVO_DB = "inventario.txt"`
 
-    def obtener_detalles(self):
-        base = super().obtener_detalles()
-        return f"{base} | [Bobina] Inductancia: {self.inductancia} | Corriente Máx: {self.corriente_max}A"
+Este archivo funciona como una pequeña base de datos en texto plano donde se guardan los componentes registrados.
 
-    def to_string(self):
-        return f"Bobina,{self.id},{self.nombre},{self.cantidad},{self.ubicacion},{self.inductancia},{self.corriente_max}"
+## 5. Clase principal
 
+La clase principal del programa se llama `ComponenteElectronico`.
 
-# =====================================================================
-# --- SECCIÓN: CLASES HIJAS (COMPONENTES ACTIVOS) ---
-# =====================================================================
-class Diodo(ComponenteElectronico):
-    def __init__(self, id_item, nombre, cantidad, ubicacion, tipo_diodo, corriente_max):
-        super().__init__(id_item, nombre, cantidad, ubicacion)
-        self.tipo_diodo = tipo_diodo
-        self.corriente_max = corriente_max
+Esta clase contiene los datos básicos que tienen todos los componentes:
 
-    def obtener_detalles(self):
-        base = super().obtener_detalles()
-        return f"{base} | [Diodo] Tipo: {self.tipo_diodo} | Corriente Máx: {self.corriente_max}A"
+* ID
+* Nombre
+* Cantidad
+* Ubicación
 
-    def to_string(self):
-        return f"Diodo,{self.id},{self.nombre},{self.cantidad},{self.ubicacion},{self.tipo_diodo},{self.corriente_max}"
+Además, posee los métodos `obtener_detalles()` y `to_string()`.
 
+El método `obtener_detalles()` permite mostrar la información del componente de una manera organizada.
 
-class Transistor(ComponenteElectronico):
-    def __init__(self, id_item, nombre, cantidad, ubicacion, tipo_transistor, encapsulado):
-        super().__init__(id_item, nombre, cantidad, ubicacion)
-        self.tipo_transistor = tipo_transistor  # BJT o MOSFET
-        self.encapsulado = encapsulado
+El método `to_string()` convierte la información del objeto en una cadena de texto que posteriormente puede ser guardada en el archivo `inventario.txt`.
 
-    def obtener_detalles(self):
-        base = super().obtener_detalles()
-        return f"{base} |  [Transistor] Tipo: {self.tipo_transistor} | Encapsulado: {self.encapsulado}"
+## 6. Clases de componentes electrónicos
 
-    def to_string(self):
-        return f"Transistor,{self.id},{self.nombre},{self.cantidad},{self.ubicacion},{self.tipo_transistor},{self.encapsulado}"
+A partir de la clase principal se crearon diferentes clases hijas. Esto permite utilizar **herencia**, ya que cada componente conserva las características generales de `ComponenteElectronico`, pero además tiene características propias.
 
+Las clases creadas son:
 
-class CircuitoIntegrado(ComponenteElectronico):
-    def __init__(self, id_item, nombre, cantidad, ubicacion, numero_pines, funcion):
-        super().__init__(id_item, nombre, cantidad, ubicacion)
-        self.numero_pines = numero_pines
-        self.funcion = funcion
+### Resistencia
 
-    def obtener_detalles(self):
-        base = super().obtener_detalles()
-        return f"{base} |  [Circuito Integrado] Pines: {self.numero_pines} | Función: {self.funcion}"
+Guarda información como:
 
-    def to_string(self):
-        return f"CircuitoIntegrado,{self.id},{self.nombre},{self.cantidad},{self.ubicacion},{self.numero_pines},{self.funcion}"
+* Valor en ohmios.
+* Tolerancia.
 
+### Condensador
 
-# =====================================================================
-# --- SECCIÓN: CLASES HIJAS (PLACAS Y SISTEMAS) ---
-# =====================================================================
-class Microcontrolador(ComponenteElectronico):
-    def __init__(self, id_item, nombre, cantidad, ubicacion, voltaje_operacion, velocidad_reloj):
-        super().__init__(id_item, nombre, cantidad, ubicacion)
-        self.voltaje_operacion = voltaje_operacion
-        self.velocidad_reloj = velocidad_reloj
+Guarda:
 
-    def obtener_detalles(self):
-        base = super().obtener_detalles()
-        return f"{base} | [Microcontrolador] Voltaje: {self.voltaje_operacion}V | Reloj: {self.velocidad_reloj}"
+* Capacitancia.
+* Voltaje máximo.
 
-    def to_string(self):
-        return f"Microcontrolador,{self.id},{self.nombre},{self.cantidad},{self.ubicacion},{self.voltaje_operacion},{self.velocidad_reloj}"
+### Bobina
 
+Guarda:
 
-class Sensor(ComponenteElectronico):
-    def __init__(self, id_item, nombre, cantidad, ubicacion, magnitud_medida, interfaz):
-        super().__init__(id_item, nombre, cantidad, ubicacion)
-        self.magnitud_medida = magnitud_medida  
+* Inductancia.
+* Corriente máxima.
 
-    def obtener_detalles(self):
-        base = super().obtener_detalles()
-        return f"{base} |  [Sensor] Mide: {self.magnitud_medida} | Interfaz: {self.interfaz}"
+### Diodo
 
-    def to_string(self):
-        return f"Sensor,{self.id},{self.nombre},{self.cantidad},{self.ubicacion},{self.magnitud_medida},{self.interfaz}"
+Guarda:
 
+* Tipo de diodo.
+* Corriente máxima.
 
-# =====================================================================
-# --- SECCIÓN: CLASES HIJAS (INSTRUMENTOS DE LABORATORIO) ---
-# =====================================================================
-class InstrumentoLab(ComponenteElectronico):
-    def __init__(self, id_item, nombre, cantidad, ubicacion, marca, precision_o_rango):
-        super().__init__(id_item, nombre, cantidad, ubicacion)
-        self.marca = marca
-        self.precision_o_rango = precision_o_rango
+### Transistor
 
-    def obtener_detalles(self):
-        base = super().obtener_detalles()
-        return f"{base} |  [Instrumento] Marca: {self.marca} | Rango/Precisión: {self.precision_o_rango}"
+Guarda:
 
-    def to_string(self):
-        return f"InstrumentoLab,{self.id},{self.nombre},{self.cantidad},{self.ubicacion},{self.marca},{self.precision_o_rango}"
+* Tipo de transistor.
+* Tipo de encapsulado.
 
+### Circuito integrado
 
-# =====================================================================
-# --- SECCIÓN: USUARIOS (ROLES) ---
-# =====================================================================
-class Usuario:
-    def __init__(self, nombre, carnet):
-        self.nombre = nombre
-        self.carnet = carnet
+Guarda:
 
-    def mostrar_menu_rol(self, sistema):
-        pass
+* Número de pines.
+* Función principal.
 
+### Microcontrolador
 
-class Estudiante(Usuario):
-    def __init__(self, nombre, carnet, carrera):
-        super().__init__(nombre, carnet)
-        self.carrera = carrera
+Guarda:
 
-    def mostrar_menu_rol(self, sistema):
-        while True:
-            print(f"\n MÓDULO ESTUDIANTE: {self.nombre} ({self.carrera})")
-            print("1. Ver Inventario Completo del Laboratorio")
-            print("2. Cerrar Sesión")
-            opcion = input("Seleccione una opción: ")
+* Voltaje de operación.
+* Velocidad de reloj.
 
-            if opcion == "1":
-                sistema.mostrar_inventario()
-            elif opcion == "2":
-                break
-            else:
-                print(" Opción no válida.")
+### Sensor
 
+Guarda:
 
-class Encargado(Usuario):
-    def __init__(self, nombre, carnet, cubiculo):
-        super().__init__(nombre, carnet)
-        self.cubiculo = cubiculo
+* Magnitud que mide.
+* Interfaz de comunicación.
 
-    def mostrar_menu_rol(self, sistema):
-        while True:
-            print(f"\n MÓDULO ENCARGADO: {self.nombre} (Cubículo: {self.cubiculo})")
-            print("--- AGREGAR COMPONENTE ESPECÍFICO ---")
-            print("1. Registrar Resistencia")
-            print("2. Registrar Condensador")
-            print("3. Registrar Bobina")
-            print("4. Registrar Diodo")
-            print("5. Registrar Transistor")
-            print("6. Registrar Circuito Integrado (IC)")
-            print("7. Registrar Microcontrolador")
-            print("8. Registrar Sensor")
-            print("9. Registrar Instrumento de Medición (Multímetro/Osciloscopio)")
-            print("10. Eliminar Componente por ID")
-            print("11. Ver Inventario Completo")
-            print("12. Cerrar Sesión")
-            opcion = input("Seleccione una opción: ")
+### Instrumento de laboratorio
 
-            if opcion == "1":
-                sistema.agregar_item(Resistencia(
-                    input("ID: "), input("Nombre: "), input("Cantidad: "), input("Ubicación: "),
-                    input("Valor en Ohmios (ej. 220Ω, 10kΩ): "), input("Tolerancia (ej. 5%): ")
-                ))
-            elif opcion == "2":
-                sistema.agregar_item(Condensador(
-                    input("ID: "), input("Nombre: "), input("Cantidad: "), input("Ubicación: "),
-                    input("Capacitancia (ej. 100uF, 22pF): "), input("Voltaje Máximo (ej. 50V): ")
-                ))
-            elif opcion == "3":
-                sistema.agregar_item(Bobina(
-                    input("ID: "), input("Nombre: "), input("Cantidad: "), input("Ubicación: "),
-                    input("Inductancia (ej. 10mH): "), input("Corriente Máx (ej. 1A): ")
-                ))
-            elif opcion == "4":
-                sistema.agregar_item(Diodo(
-                    input("ID: "), input("Nombre: "), input("Cantidad: "), input("Ubicación: "),
-                    input("Tipo de Diodo (ej. LED, Zener, Rectificador): "), input("Corriente Máx: ")
-                ))
-            elif opcion == "5":
-                sistema.agregar_item(Transistor(
-                    input("ID: "), input("Nombre: "), input("Cantidad: "), input("Ubicación: "),
-                    input("Tipo (ej. BJT o MOSFET): "), input("Encapsulado (ej. TO-92, TO-220): ")
-                ))
-            elif opcion == "6":
-                sistema.agregar_item(CircuitoIntegrado(
-                    input("ID: "), input("Nombre: "), input("Cantidad: "), input("Ubicación: "),
-                    input("Número de pines (ej. 8, 14, 40): "), input("Función principal (ej. Compuerta AND, Amplificador): ")
-                ))
-            elif opcion == "7":
-                sistema.agregar_item(Microcontrolador(
-                    input("ID: "), input("Nombre: "), input("Cantidad: "), input("Ubicación: "),
-                    input("Voltaje de operación (ej. 3.3V / 5V): "), input("Velocidad de reloj (ej. 16MHz): ")
-                ))
-            elif opcion == "8":
-                sistema.agregar_item(Sensor(
-                    input("ID: "), input("Nombre: "), input("Cantidad: "), input("Ubicación: "),
-                    input("Magnitud que mide (ej. Temperatura, Distancia): "), input("Interfaz de comunicación (ej. I2C, Analógico): ")
-                ))
-            elif opcion == "9":
-                sistema.agregar_item(InstrumentoLab(
-                    input("ID: "), input("Nombre: "), input("Cantidad: "), input("Ubicación: "),
-                    input("Marca (ej. Fluke, Rigol): "), input("Precisión o Rango: ")
-                ))
-            elif opcion == "10":
-                sistema.eliminar_item(input("Ingrese el ID del componente a eliminar: "))
-            elif opcion == "11":
-                sistema.mostrar_inventario()
-            elif opcion == "12":
-                break
-            else:
-                print(" Opción no válida.")
+Guarda:
 
+* Marca.
+* Precisión o rango.
 
-# =====================================================================
-# --- SECCIÓN: CONTROLADOR Y PERSISTENCIA ---
-# =====================================================================
-class SistemaInventario:
-    def __init__(self):
-        self.inventario = []
-        self.cargar_desde_archivo()
+Cada una de estas clases tiene su propio método `obtener_detalles()` y `to_string()`, adaptados a las características del componente.
 
-    def agregar_item(self, item):
-        self.inventario.append(item)
-        self.guardar_en_archivo()
-        print(f" ¡{item.nombre} registrado correctamente en el inventario!")
+## 7. Sistema de usuarios
 
-    def eliminar_item(self, id_item):
-        encontrado = False
-        for item in self.inventario:
-            if item.id == id_item:
-                self.inventario.remove(item)
-                encontrado = True
-                break
-        
-        if encontrado:
-            self.guardar_en_archivo()
-            print(f"Elemento con ID '{id_item}' eliminado correctamente.")
-        else:
-            print(f"No se encontró ningún elemento con el ID '{id_item}'.")
+El programa también cuenta con una clase llamada `Usuario`, que funciona como clase base para los diferentes tipos de usuarios.
 
-    def mostrar_inventario(self):
-        if not self.inventario:
-            print("\n📭 El inventario está vacío.")
-            return
-        
-        print("\n--- INVENTARIO DETALLADO DEL LABORATORIO ---")
-        for item in self.inventario:
-            print(item.obtener_detalles())
-        print("---------------------------------------------")
+Se crearon dos tipos principales:
 
-    def guardar_en_archivo(self):
-        with open(ARCHIVO_DB, "w", encoding="utf-8") as f:
-            for item in self.inventario:
-                f.write(item.to_string() + "\n")
+### Estudiante
 
-    def cargar_desde_archivo(self):
-        if not os.path.exists(ARCHIVO_DB):
-            return
-        
-        self.inventario = []
-        with open(ARCHIVO_DB, "r", encoding="utf-8") as f:
-            for linea in f:
-                datos = linea.strip().split(",")
-                if not datos or datos[0] == "":
-                    continue
-                
-                tipo = datos[0]
-                # Reconstrucción de cada objeto según su clase exacta al leer el .txt
-                if tipo == "Resistencia":
-                    item = Resistencia(datos[1], datos[2], datos[3], datos[4], datos[5], datos[6])
-                elif tipo == "Condensador":
-                    item = Condensador(datos[1], datos[2], datos[3], datos[4], datos[5], datos[6])
-                elif tipo == "Bobina":
-                    item = Bobina(datos[1], datos[2], datos[3], datos[4], datos[5], datos[6])
-                elif tipo == "Diodo":
-                    item = Diodo(datos[1], datos[2], datos[3], datos[4], datos[5], datos[6])
-                elif tipo == "Transistor":
-                    item = Transistor(datos[1], datos[2], datos[3], datos[4], datos[5], datos[6])
-                elif tipo == "CircuitoIntegrado":
-                    item = CircuitoIntegrado(datos[1], datos[2], datos[3], datos[4], datos[5], datos[6])
-                elif tipo == "Microcontrolador":
-                    item = Microcontrolador(datos[1], datos[2], datos[3], datos[4], datos[5], datos[6])
-                elif tipo == "Sensor":
-                    item = Sensor(datos[1], datos[2], datos[3], datos[4], datos[5], datos[6])
-                elif tipo == "InstrumentoLab":
-                    item = InstrumentoLab(datos[1], datos[2], datos[3], datos[4], datos[5], datos[6])
-                else:
-                    item = ComponenteElectronico(datos[1], datos[2], datos[3], datos[4])
-                
-                self.inventario.append(item)
+El estudiante tiene:
 
+* Nombre.
+* Carnet.
+* Carrera.
 
-# =====================================================================
-# --- EJECUCIÓN PRINCIPAL ---
-# =====================================================================
-def main():
-    sistema = SistemaInventario()
-    
-    while True:
-        print("\n=== SISTEMA DE GESTIÓN - LAB DE ELECTRÓNICA ===")
-        print("1. Ingresar como Estudiante")
-        print("2. Ingresar como Encargado de Laboratorio")
-        print("3. Salir")
-        
-        rol = input("Seleccione una opción: ")
-        
-        if rol == "1":
-            usuario = Estudiante(input("Nombre: "), input("Carnet: "), input("Carrera: "))
-            usuario.mostrar_menu_rol(sistema)
-        elif rol == "2":
-            usuario = Encargado(input("Nombre: "), input("Código empleado: "), input("Cubículo: "))
-            usuario.mostrar_menu_rol(sistema)
-        elif rol == "3":
-            print(" Saliendo del sistema. ¡Hasta luego!")
-            break
-        else:
-            print("Opción inválida.")
+Su función principal es consultar el inventario completo del laboratorio. El menú le permite ver el inventario o cerrar sesión.
 
-if __name__ == "__main__":
-    main()
+### Encargado del laboratorio
+
+El encargado tiene:
+
+* Nombre.
+* Código o carnet.
+* Cubículo.
+
+Tiene más permisos que el estudiante. Puede registrar diferentes componentes, eliminar componentes por ID, consultar el inventario y cerrar sesión.
+
+## 8. Sistema de inventario
+
+La clase `SistemaInventario` es la encargada de controlar las operaciones principales del programa.
+
+Al iniciar, crea una lista llamada `inventario` y posteriormente intenta cargar los datos almacenados en el archivo.
+
+Entre sus principales funciones están:
+
+### Agregar componentes
+
+El método `agregar_item()` añade un nuevo objeto a la lista del inventario y posteriormente guarda la información en el archivo.
+
+### Eliminar componentes
+
+El método `eliminar_item()` busca un componente mediante su ID. Si lo encuentra, lo elimina del inventario y actualiza el archivo.
+
+### Mostrar inventario
+
+El método `mostrar_inventario()` recorre todos los objetos almacenados y muestra sus características utilizando el método `obtener_detalles()`.
+
+## 9. Almacenamiento de información
+
+Una parte importante del proyecto es que la información no solamente permanece mientras el programa está abierto.
+
+El método `guardar_en_archivo()` abre el archivo `inventario.txt` y escribe la información de cada componente.
+
+Por otra parte, `cargar_desde_archivo()` verifica si el archivo existe y, si existe, lee cada línea para reconstruir los objetos correspondientes.
+
+El programa identifica el tipo de componente mediante la primera información almacenada en cada línea. Por ejemplo, si encuentra `"Resistencia"`, crea nuevamente un objeto de la clase `Resistencia`.
+
+Esto permite que el inventario se conserve aunque el programa sea cerrado.
+
+## 10. Ejecución principal
+
+La función `main()` es la encargada de iniciar el sistema.
+
+Cuando se ejecuta el programa aparecen tres opciones:
+
+1. Ingresar como estudiante.
+2. Ingresar como encargado de laboratorio.
+3. Salir.
+
+Dependiendo de la opción seleccionada, el programa crea un objeto de tipo `Estudiante` o `Encargado` y muestra el menú correspondiente.
+
+Finalmente, la instrucción:
+
+`if __name__ == "__main__":`
+
+permite ejecutar la función `main()` cuando el archivo Python se ejecuta directamente.
+
+## 11. Conceptos de programación utilizados
+
+Durante el desarrollo del programa se utilizaron varios conceptos de programación orientada a objetos:
+
+**Clases:**
+Se utilizan para crear modelos de componentes y usuarios.
+
+**Objetos:**
+Representan elementos concretos del inventario, como una resistencia, un sensor o un microcontrolador.
+
+**Herencia:**
+Las clases específicas como `Resistencia`, `Diodo` o `Sensor` heredan las características de `ComponenteElectronico`.
+
+**Encapsulamiento:**
+La información de cada objeto se mantiene organizada dentro de sus respectivas clases y atributos.
+
+**Métodos:**
+Permiten realizar acciones como mostrar información, guardar datos, agregar componentes y eliminarlos.
+
+**Polimorfismo:**
+Las diferentes clases tienen métodos con el mismo nombre, como `obtener_detalles()`, pero cada clase muestra información adicional dependiendo del tipo de componente.
+
+## 12. Funcionamiento general
+
+El funcionamiento del programa puede resumirse de la siguiente manera:
+
+**Inicio del programa → Cargar inventario → Seleccionar tipo de usuario → Mostrar menú → Realizar acción → Actualizar inventario → Guardar información → Continuar o cerrar sesión.**
+
+De esta manera, el sistema permite llevar un control organizado de los componentes electrónicos disponibles en el laboratorio.
+
+## 13. Resultados
+
+Como resultado se obtuvo un sistema capaz de administrar diferentes tipos de componentes electrónicos. El programa permite registrar componentes con información específica, consultar el inventario, eliminar elementos y conservar los datos mediante un archivo de texto.
+
+También se logró diferenciar las funciones de los estudiantes y del encargado del laboratorio mediante diferentes menús.
+
+## 14. Conclusiones
+
+El desarrollo de este proyecto permitió aplicar los conocimientos de programación orientada a objetos en una situación práctica relacionada con un laboratorio de electrónica.
+
+Se aprendió a utilizar clases, objetos, herencia y métodos para organizar mejor un programa. Además, se implementó el almacenamiento de información en un archivo de texto, lo que permite conservar el inventario después de cerrar el programa.
+
+El sistema facilita la organización de los componentes electrónicos y demuestra cómo Python puede utilizarse para crear programas que solucionen necesidades reales de organización y administración.
+
+## 15. Recomendaciones
+
+Como posibles mejoras para una futura versión se podrían agregar un sistema de inicio de sesión con contraseña, búsqueda de componentes por nombre o tipo, modificación de cantidades, control de préstamos y devoluciones, y una interfaz gráfica para hacer que el programa sea más fácil de utilizar.
