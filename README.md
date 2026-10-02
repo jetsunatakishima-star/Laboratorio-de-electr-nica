@@ -1,4 +1,4 @@
-# Laboratorio-de-electronic
+# Laboratorio-de-electronica
 # INFORME DEL SISTEMA DE GESTIÓN DE INVENTARIO DEL LABORATORIO DE ELECTRÓNICA
 
 ## 1. Introducción
