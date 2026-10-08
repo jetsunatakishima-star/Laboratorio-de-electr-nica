@@ -1,7 +1,7 @@
-import os
+import sqlite3
 
-# --- BASE DE DATOS EN TEXTO PLANO ---
-ARCHIVO_DB = "inventario.txt"
+# --- BASE DE DATOS SQLITE ---
+ARCHIVO_DB = "inventario.db"
 
 # =====================================================================
 # --- SECCIÓN: CLASE PADRE (Componente Electrónico General) ---
@@ -16,8 +16,8 @@ class ComponenteElectronico:
     def obtener_detalles(self):
         return f"ID: {self.id} | {self.nombre} | Cantidad: {self.cantidad} | Ubicación: {self.ubicacion}"
 
-    def to_string(self):
-        return f"General,{self.id},{self.nombre},{self.cantidad},{self.ubicacion}"
+    def get_db_data(self):
+        return ("General", None, None)
 
 
 # =====================================================================
@@ -33,8 +33,8 @@ class Resistencia(ComponenteElectronico):
         base = super().obtener_detalles()
         return f"{base} | [Resistencia] Valor: {self.valor_ohmios} | Tolerancia: {self.tolerancia}%"
 
-    def to_string(self):
-        return f"Resistencia,{self.id},{self.nombre},{self.cantidad},{self.ubicacion},{self.valor_ohmios},{self.tolerancia}"
+    def get_db_data(self):
+        return ("Resistencia", self.valor_ohmios, self.tolerancia)
 
 
 class Condensador(ComponenteElectronico):
@@ -47,8 +47,8 @@ class Condensador(ComponenteElectronico):
         base = super().obtener_detalles()
         return f"{base} | [Condensador] Capacitancia: {self.capacitancia} | Voltaje Máx: {self.voltaje_max}V"
 
-    def to_string(self):
-        return f"Condensador,{self.id},{self.nombre},{self.cantidad},{self.ubicacion},{self.capacitancia},{self.voltaje_max}"
+    def get_db_data(self):
+        return ("Condensador", self.capacitancia, self.voltaje_max)
 
 
 class Bobina(ComponenteElectronico):
@@ -61,8 +61,8 @@ class Bobina(ComponenteElectronico):
         base = super().obtener_detalles()
         return f"{base} | [Bobina] Inductancia: {self.inductancia} | Corriente Máx: {self.corriente_max}A"
 
-    def to_string(self):
-        return f"Bobina,{self.id},{self.nombre},{self.cantidad},{self.ubicacion},{self.inductancia},{self.corriente_max}"
+    def get_db_data(self):
+        return ("Bobina", self.inductancia, self.corriente_max)
 
 
 # =====================================================================
@@ -78,8 +78,8 @@ class Diodo(ComponenteElectronico):
         base = super().obtener_detalles()
         return f"{base} | [Diodo] Tipo: {self.tipo_diodo} | Corriente Máx: {self.corriente_max}A"
 
-    def to_string(self):
-        return f"Diodo,{self.id},{self.nombre},{self.cantidad},{self.ubicacion},{self.tipo_diodo},{self.corriente_max}"
+    def get_db_data(self):
+        return ("Diodo", self.tipo_diodo, self.corriente_max)
 
 
 class Transistor(ComponenteElectronico):
@@ -90,10 +90,10 @@ class Transistor(ComponenteElectronico):
 
     def obtener_detalles(self):
         base = super().obtener_detalles()
-        return f"{base} |  [Transistor] Tipo: {self.tipo_transistor} | Encapsulado: {self.encapsulado}"
+        return f"{base} | [Transistor] Tipo: {self.tipo_transistor} | Encapsulado: {self.encapsulado}"
 
-    def to_string(self):
-        return f"Transistor,{self.id},{self.nombre},{self.cantidad},{self.ubicacion},{self.tipo_transistor},{self.encapsulado}"
+    def get_db_data(self):
+        return ("Transistor", self.tipo_transistor, self.encapsulado)
 
 
 class CircuitoIntegrado(ComponenteElectronico):
@@ -104,10 +104,10 @@ class CircuitoIntegrado(ComponenteElectronico):
 
     def obtener_detalles(self):
         base = super().obtener_detalles()
-        return f"{base} |  [Circuito Integrado] Pines: {self.numero_pines} | Función: {self.funcion}"
+        return f"{base} | [Circuito Integrado] Pines: {self.numero_pines} | Función: {self.funcion}"
 
-    def to_string(self):
-        return f"CircuitoIntegrado,{self.id},{self.nombre},{self.cantidad},{self.ubicacion},{self.numero_pines},{self.funcion}"
+    def get_db_data(self):
+        return ("CircuitoIntegrado", self.numero_pines, self.funcion)
 
 
 # =====================================================================
@@ -123,21 +123,22 @@ class Microcontrolador(ComponenteElectronico):
         base = super().obtener_detalles()
         return f"{base} | [Microcontrolador] Voltaje: {self.voltaje_operacion}V | Reloj: {self.velocidad_reloj}"
 
-    def to_string(self):
-        return f"Microcontrolador,{self.id},{self.nombre},{self.cantidad},{self.ubicacion},{self.voltaje_operacion},{self.velocidad_reloj}"
+    def get_db_data(self):
+        return ("Microcontrolador", self.voltaje_operacion, self.velocidad_reloj)
 
 
 class Sensor(ComponenteElectronico):
     def __init__(self, id_item, nombre, cantidad, ubicacion, magnitud_medida, interfaz):
         super().__init__(id_item, nombre, cantidad, ubicacion)
         self.magnitud_medida = magnitud_medida  
+        self.interfaz = interfaz
 
     def obtener_detalles(self):
         base = super().obtener_detalles()
-        return f"{base} |  [Sensor] Mide: {self.magnitud_medida} | Interfaz: {self.interfaz}"
+        return f"{base} | [Sensor] Mide: {self.magnitud_medida} | Interfaz: {self.interfaz}"
 
-    def to_string(self):
-        return f"Sensor,{self.id},{self.nombre},{self.cantidad},{self.ubicacion},{self.magnitud_medida},{self.interfaz}"
+    def get_db_data(self):
+        return ("Sensor", self.magnitud_medida, self.interfaz)
 
 
 # =====================================================================
@@ -151,10 +152,10 @@ class InstrumentoLab(ComponenteElectronico):
 
     def obtener_detalles(self):
         base = super().obtener_detalles()
-        return f"{base} |  [Instrumento] Marca: {self.marca} | Rango/Precisión: {self.precision_o_rango}"
+        return f"{base} | [Instrumento] Marca: {self.marca} | Rango/Precisión: {self.precision_o_rango}"
 
-    def to_string(self):
-        return f"InstrumentoLab,{self.id},{self.nombre},{self.cantidad},{self.ubicacion},{self.marca},{self.precision_o_rango}"
+    def get_db_data(self):
+        return ("InstrumentoLab", self.marca, self.precision_o_rango)
 
 
 # =====================================================================
@@ -268,82 +269,98 @@ class Encargado(Usuario):
 
 
 # =====================================================================
-# --- SECCIÓN: CONTROLADOR Y PERSISTENCIA ---
+# --- SECCIÓN: CONTROLADOR Y PERSISTENCIA (SQLITE) ---
 # =====================================================================
 class SistemaInventario:
     def __init__(self):
-        self.inventario = []
-        self.cargar_desde_archivo()
+        self.inicializar_db()
+
+    def inicializar_db(self):
+        conn = sqlite3.connect(ARCHIVO_DB)
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS componentes (
+                id TEXT PRIMARY KEY,
+                tipo TEXT,
+                nombre TEXT,
+                cantidad INTEGER,
+                ubicacion TEXT,
+                attr1 TEXT,
+                attr2 TEXT
+            )
+        ''')
+        conn.commit()
+        conn.close()
 
     def agregar_item(self, item):
-        self.inventario.append(item)
-        self.guardar_en_archivo()
-        print(f" ¡{item.nombre} registrado correctamente en el inventario!")
+        conn = sqlite3.connect(ARCHIVO_DB)
+        cursor = conn.cursor()
+        tipo, attr1, attr2 = item.get_db_data()
+        
+        try:
+            cursor.execute('''
+                INSERT OR REPLACE INTO componentes (id, tipo, nombre, cantidad, ubicacion, attr1, attr2)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (item.id, tipo, item.nombre, item.cantidad, item.ubicacion, attr1, attr2))
+            conn.commit()
+            print(f" ¡{item.nombre} registrado correctamente en la base de datos!")
+        except sqlite3.Error as e:
+            print(f" Error al registrar en la base de datos: {e}")
+        finally:
+            conn.close()
 
     def eliminar_item(self, id_item):
-        encontrado = False
-        for item in self.inventario:
-            if item.id == id_item:
-                self.inventario.remove(item)
-                encontrado = True
-                break
+        conn = sqlite3.connect(ARCHIVO_DB)
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM componentes WHERE id = ?", (id_item,))
         
-        if encontrado:
-            self.guardar_en_archivo()
-            print(f"Elemento con ID '{id_item}' eliminado correctamente.")
+        if cursor.rowcount > 0:
+            conn.commit()
+            print(f" Elemento con ID '{id_item}' eliminado correctamente.")
         else:
-            print(f"No se encontró ningún elemento con el ID '{id_item}'.")
+            print(f" No se encontró ningún elemento con el ID '{id_item}'.")
+        conn.close()
 
     def mostrar_inventario(self):
-        if not self.inventario:
+        conn = sqlite3.connect(ARCHIVO_DB)
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, tipo, nombre, cantidad, ubicacion, attr1, attr2 FROM componentes")
+        filas = cursor.fetchall()
+        conn.close()
+
+        if not filas:
             print("\n📭 El inventario está vacío.")
             return
         
-        print("\n--- INVENTARIO DETALLADO DEL LABORATORIO ---")
-        for item in self.inventario:
-            print(item.obtener_detalles())
-        print("---------------------------------------------")
+        print("\n--- INVENTARIO DETALLADO DEL LABORATORIO (SQLITE) ---")
+        for row in filas:
+            item = self._crear_instancia(row)
+            if item:
+                print(item.obtener_detalles())
+        print("-----------------------------------------------------")
 
-    def guardar_en_archivo(self):
-        with open(ARCHIVO_DB, "w", encoding="utf-8") as f:
-            for item in self.inventario:
-                f.write(item.to_string() + "\n")
-
-    def cargar_desde_archivo(self):
-        if not os.path.exists(ARCHIVO_DB):
-            return
-        
-        self.inventario = []
-        with open(ARCHIVO_DB, "r", encoding="utf-8") as f:
-            for linea in f:
-                datos = linea.strip().split(",")
-                if not datos or datos[0] == "":
-                    continue
-                
-                tipo = datos[0]
-                # Reconstrucción de cada objeto según su clase exacta al leer el .txt
-                if tipo == "Resistencia":
-                    item = Resistencia(datos[1], datos[2], datos[3], datos[4], datos[5], datos[6])
-                elif tipo == "Condensador":
-                    item = Condensador(datos[1], datos[2], datos[3], datos[4], datos[5], datos[6])
-                elif tipo == "Bobina":
-                    item = Bobina(datos[1], datos[2], datos[3], datos[4], datos[5], datos[6])
-                elif tipo == "Diodo":
-                    item = Diodo(datos[1], datos[2], datos[3], datos[4], datos[5], datos[6])
-                elif tipo == "Transistor":
-                    item = Transistor(datos[1], datos[2], datos[3], datos[4], datos[5], datos[6])
-                elif tipo == "CircuitoIntegrado":
-                    item = CircuitoIntegrado(datos[1], datos[2], datos[3], datos[4], datos[5], datos[6])
-                elif tipo == "Microcontrolador":
-                    item = Microcontrolador(datos[1], datos[2], datos[3], datos[4], datos[5], datos[6])
-                elif tipo == "Sensor":
-                    item = Sensor(datos[1], datos[2], datos[3], datos[4], datos[5], datos[6])
-                elif tipo == "InstrumentoLab":
-                    item = InstrumentoLab(datos[1], datos[2], datos[3], datos[4], datos[5], datos[6])
-                else:
-                    item = ComponenteElectronico(datos[1], datos[2], datos[3], datos[4])
-                
-                self.inventario.append(item)
+    def _crear_instancia(self, row):
+        id_item, tipo, nombre, cantidad, ubicacion, attr1, attr2 = row
+        if tipo == "Resistencia":
+            return Resistencia(id_item, nombre, cantidad, ubicacion, attr1, attr2)
+        elif tipo == "Condensador":
+            return Condensador(id_item, nombre, cantidad, ubicacion, attr1, attr2)
+        elif tipo == "Bobina":
+            return Bobina(id_item, nombre, cantidad, ubicacion, attr1, attr2)
+        elif tipo == "Diodo":
+            return Diodo(id_item, nombre, cantidad, ubicacion, attr1, attr2)
+        elif tipo == "Transistor":
+            return Transistor(id_item, nombre, cantidad, ubicacion, attr1, attr2)
+        elif tipo == "CircuitoIntegrado":
+            return CircuitoIntegrado(id_item, nombre, cantidad, ubicacion, attr1, attr2)
+        elif tipo == "Microcontrolador":
+            return Microcontrolador(id_item, nombre, cantidad, ubicacion, attr1, attr2)
+        elif tipo == "Sensor":
+            return Sensor(id_item, nombre, cantidad, ubicacion, attr1, attr2)
+        elif tipo == "InstrumentoLab":
+            return InstrumentoLab(id_item, nombre, cantidad, ubicacion, attr1, attr2)
+        else:
+            return ComponenteElectronico(id_item, nombre, cantidad, ubicacion)
 
 
 # =====================================================================
@@ -370,7 +387,8 @@ def main():
             print(" Saliendo del sistema. ¡Hasta luego!")
             break
         else:
-            print("Opción inválida.")
+            print(" Opción inválida.")
 
 if __name__ == "__main__":
     main()
+    
