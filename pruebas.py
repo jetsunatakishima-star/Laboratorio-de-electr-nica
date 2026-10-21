@@ -1,11 +1,6 @@
 import sqlite3
-
-# --- BASE DE DATOS SQLITE ---
 ARCHIVO_DB = "inventario.db"
 
-# =====================================================================
-# --- SECCIÓN: CLASE PADRE (Componente Electrónico General) ---
-# =====================================================================
 class ComponenteElectronico:
     def __init__(self, id_item, nombre, cantidad, ubicacion):
         self.id = id_item
@@ -19,10 +14,6 @@ class ComponenteElectronico:
     def get_db_data(self):
         return ("General", None, None)
 
-
-# =====================================================================
-# --- SECCIÓN: CLASES HIJAS (COMPONENTES PASIVOS) ---
-# =====================================================================
 class Resistencia(ComponenteElectronico):
     def __init__(self, id_item, nombre, cantidad, ubicacion, valor_ohmios, tolerancia):
         super().__init__(id_item, nombre, cantidad, ubicacion)
@@ -64,10 +55,6 @@ class Bobina(ComponenteElectronico):
     def get_db_data(self):
         return ("Bobina", self.inductancia, self.corriente_max)
 
-
-# =====================================================================
-# --- SECCIÓN: CLASES HIJAS (COMPONENTES ACTIVOS) ---
-# =====================================================================
 class Diodo(ComponenteElectronico):
     def __init__(self, id_item, nombre, cantidad, ubicacion, tipo_diodo, corriente_max):
         super().__init__(id_item, nombre, cantidad, ubicacion)
@@ -109,10 +96,6 @@ class CircuitoIntegrado(ComponenteElectronico):
     def get_db_data(self):
         return ("CircuitoIntegrado", self.numero_pines, self.funcion)
 
-
-# =====================================================================
-# --- SECCIÓN: CLASES HIJAS (PLACAS Y SISTEMAS) ---
-# =====================================================================
 class Microcontrolador(ComponenteElectronico):
     def __init__(self, id_item, nombre, cantidad, ubicacion, voltaje_operacion, velocidad_reloj):
         super().__init__(id_item, nombre, cantidad, ubicacion)
@@ -141,9 +124,6 @@ class Sensor(ComponenteElectronico):
         return ("Sensor", self.magnitud_medida, self.interfaz)
 
 
-# =====================================================================
-# --- SECCIÓN: CLASES HIJAS (INSTRUMENTOS DE LABORATORIO) ---
-# =====================================================================
 class InstrumentoLab(ComponenteElectronico):
     def __init__(self, id_item, nombre, cantidad, ubicacion, marca, precision_o_rango):
         super().__init__(id_item, nombre, cantidad, ubicacion)
@@ -158,9 +138,6 @@ class InstrumentoLab(ComponenteElectronico):
         return ("InstrumentoLab", self.marca, self.precision_o_rango)
 
 
-# =====================================================================
-# --- SECCIÓN: USUARIOS (ROLES) ---
-# =====================================================================
 class Usuario:
     def __init__(self, nombre, carnet):
         self.nombre = nombre
@@ -267,10 +244,6 @@ class Encargado(Usuario):
             else:
                 print(" Opción no válida.")
 
-
-# =====================================================================
-# --- SECCIÓN: CONTROLADOR Y PERSISTENCIA (SQLITE) ---
-# =====================================================================
 class SistemaInventario:
     def __init__(self):
         self.inicializar_db()
@@ -362,10 +335,6 @@ class SistemaInventario:
         else:
             return ComponenteElectronico(id_item, nombre, cantidad, ubicacion)
 
-
-# =====================================================================
-# --- EJECUCIÓN PRINCIPAL ---
-# =====================================================================
 def main():
     sistema = SistemaInventario()
     
