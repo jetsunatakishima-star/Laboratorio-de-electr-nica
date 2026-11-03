@@ -1,5 +1,5 @@
 Explicación del sistema de inventario con interfaz gráfica
-2 nov 2026 · @shima
+
 1. Objetivo y resumen
 El sistema gestiona el inventario de un laboratorio de electrónica: guarda componentes, usuarios y préstamos en SQLite3, y ahora se maneja desde una ventana hecha con Tkinter.
 El proyecto se construyó por etapas:
